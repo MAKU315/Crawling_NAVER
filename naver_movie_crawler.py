@@ -25,7 +25,7 @@ def movie_review_find():
                         help='location of chromedriver')
     parser.add_argument('-s', '--search',
                         type=str,
-                        default='갱스 오브 뉴욕',
+                        default='죽은 시인의 사회',
                         help='word for searching')
     args = vars(parser.parse_args())
     driver = webdriver.Chrome(args['dir'])
@@ -41,38 +41,10 @@ def movie_review_find():
     driver.find_element_by_xpath('//*[@id="old_content"]/ul[2]/li/dl/dt/a/strong').click()
     driver.find_element_by_xpath('//*[@id="movieEndTabMenu"]/li[5]/a').click()
 
-    # driver.find_element_by_xpath('//*[@id="content"]/div[1]/div[4]/div[5]/div[2]/div[1]/a/span').click()
     driver.switch_to_frame('pointAfterListIframe')
     driver.find_element_by_xpath('//*[@id="orderCheckbox"]/ul/li[2]/a').click()
     driver.implicitly_wait(20)
 
-    # window_after = driver.window_handles[1]
-    # driver.switch_to.window(window_after)
-
-# 죽은 시인의 사회
-# 어벤져스
-# 저스티스 리그
-# 토이 스토리 3
-
-
-    html = driver.page_source
-    bsobj = BeautifulSoup(html, 'html.parser')
-    # reviews = bsobj.find_all('div', {'class':"score_result"})
-    # reviews = bsobj.findAll('li')
-    score = bsobj.findAll('div', {'class': 'star_score'})
-    reviews = bsobj.findAll('div', {'class':"score_reple"})
-    # print(score[1])
-    # print(reviews)
-    score = score[1:]
-
-    # for i, each_review in zip(score, reviews):
-    #     review_score = i.get_text()
-    #     review_content = each_review.get_text()
-    #     print('*'*30)
-    #     # print('{}번째 리뷰'.format(i))
-    #     print('점수 : {}'.format(review_score))
-    #     print('내용 : {}'.format(review_content))
-# //*[@id="pagerTagAnchor1"]
     page = 1
 
     file_name_path = "./movie_review_crawling/" + args['search'] + ".csv"
@@ -82,7 +54,8 @@ def movie_review_find():
         print("="*200)
         try:
             driver.find_element_by_xpath('//*[@id="pagerTagAnchor{}"]'.format(page)).click()
-            # driver.implicitly_wait(10)
+            
+            driver.implicitly_wait(10)
             time.sleep(1)
             html = driver.page_source
             bsobj = BeautifulSoup(html, 'html.parser')
@@ -105,10 +78,7 @@ def movie_review_find():
                     writer.writerow({'점수':int(review_score), '내용':review_content})
 
             page += 1
-        # 
-        except:
-            print("크롤링 끝")
-            break
+        
 
 
 
