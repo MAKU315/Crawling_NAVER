@@ -2,7 +2,6 @@ import os
 from selenium import webdriver
 from bs4 import BeautifulSoup
 import argparse
-
 import csv
 
 # 폴더 만들기
