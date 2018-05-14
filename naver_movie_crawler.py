@@ -12,7 +12,7 @@ if not os.path.exists('./movie_review_crawling'):
     os.makedirs('./movie_review_crawling')
 
 
-def movie_review_find():
+def movie_review_find(search):
 
     parser = argparse.ArgumentParser(description='crawling naver shop homepage')
     parser.add_argument('-u','--url',
@@ -25,13 +25,13 @@ def movie_review_find():
                         help='location of chromedriver')
     parser.add_argument('-s', '--search',
                         type=str,
-                        default='죽은 시인의 사회',
+                        default='동주',
                         help='word for searching')
     args = vars(parser.parse_args())
     driver = webdriver.Chrome(args['dir'])
     driver.get(args['url'])
     elem = driver.find_element_by_xpath('//*[@id="ipt_tx_srch"]')
-    elem.send_keys(args['search'])
+    elem.send_keys(search)
 
     # selenium 에서 xpath 를 이용해서 크롤링 하기
     driver.find_element_by_xpath('//*[@id="jSearchArea"]/div/button').click()
@@ -42,31 +42,46 @@ def movie_review_find():
     driver.find_element_by_xpath('//*[@id="movieEndTabMenu"]/li[5]/a').click()
 
     driver.switch_to_frame('pointAfterListIframe')
-    driver.find_element_by_xpath('//*[@id="orderCheckbox"]/ul/li[2]/a').click()
-    driver.implicitly_wait(20)
+    driver.implicitly_wait(5)
 
     page = 1
+    driver.find_element_by_xpath('//*[@id="orderCheckbox"]/ul[1]/li[2]/a').click()
 
-    file_name_path = "./movie_review_crawling/" + args['search'] + ".csv"
+    driver.implicitly_wait(5)
+
+
+
+    file_name_path = "./movie_review_crawling/" + search + ".csv"
+
     print(file_name_path)
-    while True:
-        print("="*200)
-        print("="*200)
+
+    while page <= 5:
+
+        print("="*20)
+
         try:
+
+            print("=" * 20)
+
             driver.find_element_by_xpath('//*[@id="pagerTagAnchor{}"]'.format(page)).click()
-            
-            driver.implicitly_wait(10)
-            time.sleep(1)
+            time.sleep(5)
+
             html = driver.page_source
             bsobj = BeautifulSoup(html, 'html.parser')
 
             score = bsobj.findAll('div', {'class': 'star_score'})
             score = score[1:]
-            reviews = bsobj.findAll('div', {'class':"score_reple"})
+            time.sleep(2)
+
+            reviews = bsobj.findAll('div', {'class': "score_reple"})
+            time.sleep(2)
 
             for i, each_review in zip(score, reviews):
-                review_score = i.get_text()
+                review_score = i.find('em').get_text()
+
                 review_content = each_review.find('p').get_text()
+
+
                 print('*'*30)
                 # print('{}번째 리뷰'.format(i))
                 print('점수 : {}'.format(review_score))
@@ -78,13 +93,17 @@ def movie_review_find():
                     writer.writerow({'점수':int(review_score), '내용':review_content})
 
             page += 1
-        
+        # 
+        except:
+            print("크롤링 끝")
+            break
 
 
 
 if __name__ == "__main__":
-    movie_review_find()
+    movie_list = ['죽은 시인의 사회']
 
-
+    for i in range(len(movie_list)):
+        movie_review_find(movie_list[i])
 
 
